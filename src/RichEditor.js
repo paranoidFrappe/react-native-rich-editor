@@ -60,7 +60,7 @@ export default class RichTextEditor extends Component {
     } = props;
     that.state = {
       html: {
-        baseUrl: '',
+        // baseUrl: '',
         html:
           html ||
           createHTML({
@@ -259,6 +259,8 @@ export default class RichTextEditor extends Component {
       <>
         <WebView
           allowFileAccess={true}
+          allowFileAccessFromFileURLs={true}
+          allowUniversalAccessFromFileURLs={true}
           useWebKit={true}
           scrollEnabled={false}
           hideKeyboardAccessoryView={true}
