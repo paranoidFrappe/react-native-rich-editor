@@ -257,6 +257,7 @@ export default class RichTextEditor extends Component {
     return (
       <>
         <WebView
+          allowFileAccess={true}
           useWebKit={true}
           scrollEnabled={false}
           hideKeyboardAccessoryView={true}
