@@ -60,7 +60,7 @@ export default class RichTextEditor extends Component {
     } = props;
     that.state = {
       html: {
-        baseUrl: '',
+        baseUrl: global.appAssetsDirectoryPath,
         html:
           html ||
           createHTML({
@@ -259,6 +259,7 @@ export default class RichTextEditor extends Component {
       <>
         <WebView
           allowFileAccess={true}
+          allowReadAccessToURL={true}
           allowFileAccessFromFileURLs={true}
           allowUniversalAccessFromFileURLs={true}
           useWebKit={true}
@@ -275,7 +276,8 @@ export default class RichTextEditor extends Component {
           domStorageEnabled={false}
           bounces={false}
           javaScriptEnabled={true}
-          source={viewHTML}
+          // source={viewHTML}
+          source={{ html: this.state.html.html, baseUrl: this.state.html.baseUrl }}
           onLoad={that.init}
           // onShouldStartLoadWithRequest={event => {
           //   if (event.url !== 'about:blank') {
@@ -285,6 +287,18 @@ export default class RichTextEditor extends Component {
           //   }
           //   return true;
           // }}
+          onShouldStartLoadWithRequest={event => {
+            // Check if the URL is not a web URL
+            if (event.url.startsWith('file://') || event.url === 'about:blank') {
+              return true;
+            } else {
+              this.webviewBridge?.stopLoading();
+              Linking.openURL(event.url).catch(e => {
+                console.error('Failed to open URL:', e.message);
+              });
+              return false;
+            }
+          }}          
         />
         {Platform.OS === 'android' && <TextInput ref={ref => (that._input = ref)} style={styles._input} />}
       </>
