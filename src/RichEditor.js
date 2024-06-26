@@ -214,7 +214,7 @@ export default class RichTextEditor extends Component {
           offsetY > 0 && onCursorPosition(offsetY);
           break;
         case 'FONT_SIZE':
-          console.log("Current font size:", message.fontSize);
+          // console.log("Current font size:", message.fontSize);
           if (this.fontSizeResolver) {
             this.fontSizeResolver(message.fontSize); // Resolve the promise with the font size
             this.fontSizeResolver = null; // Clean up the resolver
