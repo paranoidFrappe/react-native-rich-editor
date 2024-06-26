@@ -42,6 +42,13 @@ function createHTML(options = {}) {
     useContainer = true,
     styleWithCSS = false,
   } = options;
+  const getFontSizeJS = `
+  function getFontSize() {
+    const fontSize = document.queryCommandValue('fontSize');
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'FONT_SIZE', fontSize: fontSize }));
+  }
+  `;
+
   //ERROR: HTML height not 100%;
   return `
 <!DOCTYPE html>
@@ -69,6 +76,7 @@ function createHTML(options = {}) {
 <body>
 <div class="content"><div id="editor" class="pell"/></div>
 <script>
+    ${getFontSizeJS}
     var __DEV__ = !!${window.__DEV__};
     var _ = (function (exports) {
         var anchorNode, focusNode, anchorOffset, focusOffset, _focusCollapse = false, cNode;
@@ -98,6 +106,7 @@ function createHTML(options = {}) {
         function queryCommandValue(command) {
             return document.queryCommandValue(command);
         };
+
         function query(command){
             return document.querySelector(command);
         }
