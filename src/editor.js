@@ -709,6 +709,24 @@ function createHTML(options = {}) {
                 Actions.content.focus();
                 handleSelecting(event);
             });
+            function handleCursorChange() {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'cursorPositionChange',
+                    cursorPosition: { x: rect.left, y: rect.top }
+                  }));
+                }
+              }
+              
+              // Listen to relevant events that signify cursor changes
+              document.addEventListener('keyup', handleCursorChange);
+              document.addEventListener('mouseup', handleCursorChange);
+              document.addEventListener('touchend', handleCursorChange);
+              document.addEventListener('input', handleCursorChange); // 'input' for on-screen keyboards or auto-corrections
+              
             return {content, paragraphSeparator: paragraphSeparator, settings};
         };
 
