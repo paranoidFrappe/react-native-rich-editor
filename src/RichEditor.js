@@ -139,9 +139,17 @@ export default class RichTextEditor extends Component {
         // this.setEditorHeight(editorAvailableHeight);
     }*/
 
+  // getFontSizeFromWebView() {
+  //   const script = `getFontSize();`;  // `getFontSize()` should be defined in WebView's HTML content
+  //   this.webviewBridge?.injectJavaScript(script);
+  // }
   getFontSizeFromWebView() {
-    const script = `getFontSize();`;  // `getFontSize()` should be defined in WebView's HTML content
-    this.webviewBridge?.injectJavaScript(script);
+    return new Promise((resolve, reject) => {
+      this.fontSizeResolver = resolve; // Store the resolver function
+      // Inject JavaScript to fetch and post the font size
+      const script = `if(window.getFontSize) { window.getFontSize(); } else { console.error('getFontSize function not defined'); }`;
+      this.webviewBridge?.injectJavaScript(script);
+    });
   }
     
   onMessage(event) {
@@ -207,7 +215,11 @@ export default class RichTextEditor extends Component {
           break;
         case 'FONT_SIZE':
           console.log("Current font size:", message.fontSize);
-          console.log("message:", message);
+          if (this.fontSizeResolver) {
+            this.fontSizeResolver(message.fontSize); // Resolve the promise with the font size
+            this.fontSizeResolver = null; // Clean up the resolver
+          }
+          break;
         default:
           onMessage?.(message);
           break;
