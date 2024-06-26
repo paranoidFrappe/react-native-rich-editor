@@ -139,6 +139,11 @@ export default class RichTextEditor extends Component {
         // this.setEditorHeight(editorAvailableHeight);
     }*/
 
+  getFontSizeFromWebView() {
+    const script = `getFontSize();`;  // `getFontSize()` should be defined in WebView's HTML content
+    this.webviewBridge?.injectJavaScript(script);
+  }
+    
   onMessage(event) {
     const that = this;
     const {onFocus, onBlur, onChange, onPaste, onKeyUp, onKeyDown, onInput, onMessage, onCursorPosition, onLink} = that.props;
@@ -200,6 +205,9 @@ export default class RichTextEditor extends Component {
           let offsetY = Number.parseInt(Number.parseInt(data) + that.layout.y || 0);
           offsetY > 0 && onCursorPosition(offsetY);
           break;
+        case 'FONT_SIZE':
+          console.log("Current font size:", message.fontSize);
+          console.log("message:", message);
         default:
           onMessage?.(message);
           break;
@@ -420,6 +428,10 @@ export default class RichTextEditor extends Component {
 
   setFontSize(size) {
     this.sendAction(actions.fontSize, 'result', size);
+  }
+
+  getFontSize() {
+    this.sendAction(actions.fontSize, 'state');
   }
 
   setForeColor(color) {
