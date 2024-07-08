@@ -60,7 +60,7 @@ export default class RichTextEditor extends Component {
     } = props;
     that.state = {
       html: {
-        baseUrl: '',
+        baseUrl: global.appAssetsDirectoryPath,
         html:
           html ||
           createHTML({
@@ -139,9 +139,22 @@ export default class RichTextEditor extends Component {
         // this.setEditorHeight(editorAvailableHeight);
     }*/
 
+  // getFontSizeFromWebView() {
+  //   const script = `getFontSize();`;  // `getFontSize()` should be defined in WebView's HTML content
+  //   this.webviewBridge?.injectJavaScript(script);
+  // }
+  getFontSizeFromWebView() {
+    return new Promise((resolve, reject) => {
+      this.fontSizeResolver = resolve; // Store the resolver function
+      // Inject JavaScript to fetch and post the font size
+      const script = `if(window.getFontSize) { window.getFontSize(); } else { console.error('getFontSize function not defined'); }`;
+      this.webviewBridge?.injectJavaScript(script);
+    });
+  }
+    
   onMessage(event) {
     const that = this;
-    const {onFocus, onBlur, onChange, onPaste, onKeyUp, onKeyDown, onInput, onMessage, onCursorPosition, onLink} = that.props;
+    const {onFocus, onBlur, onChange, onPaste, onKeyUp, onKeyDown, onInput, onMessage, onCursorPosition, onLink, onCursorIsMoving} = that.props;
     try {
       const message = JSON.parse(event.nativeEvent.data);
       const data = message.data;
@@ -199,6 +212,18 @@ export default class RichTextEditor extends Component {
         case messages.OFFSET_Y:
           let offsetY = Number.parseInt(Number.parseInt(data) + that.layout.y || 0);
           offsetY > 0 && onCursorPosition(offsetY);
+          break;
+        case 'FONT_SIZE':
+          // console.log("Current font size:", message.fontSize);
+          if (this.fontSizeResolver) {
+            this.fontSizeResolver(message.fontSize); // Resolve the promise with the font size
+            this.fontSizeResolver = null; // Clean up the resolver
+          }
+          break;
+        case 'cursorPositionChange':
+          // Call a function whenever the cursor position changes
+          // console.log("Cursor position changed:", message.cursorPosition);
+          onCursorIsMoving?.();
           break;
         default:
           onMessage?.(message);
@@ -259,6 +284,9 @@ export default class RichTextEditor extends Component {
       <>
         <WebView
           allowFileAccess={true}
+          allowReadAccessToURL={true}
+          allowFileAccessFromFileURLs={true}
+          allowUniversalAccessFromFileURLs={true}
           useWebKit={true}
           scrollEnabled={false}
           hideKeyboardAccessoryView={true}
@@ -273,16 +301,29 @@ export default class RichTextEditor extends Component {
           domStorageEnabled={false}
           bounces={false}
           javaScriptEnabled={true}
-          source={viewHTML}
+          // source={viewHTML}
+          source={{ html: this.state.html.html, baseUrl: this.state.html.baseUrl }}
           onLoad={that.init}
+          // onShouldStartLoadWithRequest={event => {
+          //   if (event.url !== 'about:blank') {
+          //     this.webviewBridge?.stopLoading();
+          //     Linking?.openURL(event.url);
+          //     return false;
+          //   }
+          //   return true;
+          // }}
           onShouldStartLoadWithRequest={event => {
-            if (event.url !== 'about:blank') {
+            // Check if the URL is not a web URL
+            if (event.url.startsWith('file://') || event.url === 'about:blank') {
+              return true;
+            } else {
               this.webviewBridge?.stopLoading();
-              Linking?.openURL(event.url);
+              Linking.openURL(event.url).catch(e => {
+                console.error('Failed to open URL:', e.message);
+              });
               return false;
             }
-            return true;
-          }}
+          }}          
         />
         {Platform.OS === 'android' && <TextInput ref={ref => (that._input = ref)} style={styles._input} />}
       </>
@@ -404,6 +445,10 @@ export default class RichTextEditor extends Component {
 
   setFontSize(size) {
     this.sendAction(actions.fontSize, 'result', size);
+  }
+
+  getFontSize() {
+    this.sendAction(actions.fontSize, 'state');
   }
 
   setForeColor(color) {

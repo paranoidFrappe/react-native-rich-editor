@@ -42,6 +42,13 @@ function createHTML(options = {}) {
     useContainer = true,
     styleWithCSS = false,
   } = options;
+  const getFontSizeJS = `
+  function getFontSize() {
+    const fontSize = document.queryCommandValue('fontSize');
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'FONT_SIZE', fontSize: fontSize }));
+  }
+  `;
+
   //ERROR: HTML height not 100%;
   return `
 <!DOCTYPE html>
@@ -69,6 +76,7 @@ function createHTML(options = {}) {
 <body>
 <div class="content"><div id="editor" class="pell"/></div>
 <script>
+    ${getFontSizeJS}
     var __DEV__ = !!${window.__DEV__};
     var _ = (function (exports) {
         var anchorNode, focusNode, anchorOffset, focusOffset, _focusCollapse = false, cNode;
@@ -98,6 +106,7 @@ function createHTML(options = {}) {
         function queryCommandValue(command) {
             return document.queryCommandValue(command);
         };
+
         function query(command){
             return document.querySelector(command);
         }
@@ -700,6 +709,24 @@ function createHTML(options = {}) {
                 Actions.content.focus();
                 handleSelecting(event);
             });
+            function handleCursorChange() {
+                const selection = window.getSelection();
+                if (selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'cursorPositionChange',
+                    cursorPosition: { x: rect.left, y: rect.top }
+                  }));
+                }
+              }
+              
+              // Listen to relevant events that signify cursor changes
+              document.addEventListener('keyup', handleCursorChange);
+              document.addEventListener('mouseup', handleCursorChange);
+              document.addEventListener('touchend', handleCursorChange);
+              document.addEventListener('input', handleCursorChange); // 'input' for on-screen keyboards or auto-corrections
+              
             return {content, paragraphSeparator: paragraphSeparator, settings};
         };
 
