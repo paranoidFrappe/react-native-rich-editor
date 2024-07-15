@@ -287,6 +287,8 @@ export default class RichTextEditor extends Component {
           allowReadAccessToURL={true}
           allowFileAccessFromFileURLs={true}
           allowUniversalAccessFromFileURLs={true}
+          allowsInlineMediaPlayback={true}
+          allowsFullscreenVideo={true}
           useWebKit={true}
           scrollEnabled={false}
           hideKeyboardAccessoryView={true}
@@ -299,6 +301,7 @@ export default class RichTextEditor extends Component {
           originWhitelist={['*']}
           dataDetectorTypes={'none'}
           domStorageEnabled={false}
+          mediaPlaybackRequiresUserAction={true}
           bounces={false}
           javaScriptEnabled={true}
           // source={viewHTML}
