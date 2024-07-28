@@ -289,7 +289,7 @@ export default class RichTextEditor extends Component {
           allowUniversalAccessFromFileURLs={true}
           allowsInlineMediaPlayback={true}
           allowsFullscreenVideo={true}
-          allowingReadAccessToURL={global.appAssetsDirectoryPath}
+          // allowingReadAccessToURL={global.appAssetsDirectoryPath}
           useWebKit={true}
           scrollEnabled={false}
           hideKeyboardAccessoryView={true}
