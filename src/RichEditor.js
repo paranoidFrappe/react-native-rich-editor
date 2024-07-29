@@ -488,6 +488,14 @@ export default class RichTextEditor extends Component {
     return this._keyOpen;
   }
 
+  handleToggleCustomizedKeyboard = () => {
+    if (this.isKeyboardOpen) {
+      this.dismissKeyboard();
+    } else {
+      this.focusContentEditor();
+    }
+  };
+
   init() {
     let that = this;
     const {initialFocus, initialContentHTML, placeholder, editorInitializedCallback, disabled} = that.props;
