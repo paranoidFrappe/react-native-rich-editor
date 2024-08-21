@@ -227,6 +227,7 @@ export default class RichToolbar extends Component {
         key={action}
         disabled={disabled}
         style={[{width: iconGap + iconSize}, styles.item, itemStyle, style]}
+        accessibilityLabel={action}
         onPress={() => that._onPress(action)}>
         {icon ? (
           typeof icon === 'function' ? (
