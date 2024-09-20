@@ -732,6 +732,37 @@ function getContentCSS() {
                 document.addEventListener('mouseup', handleCursorChange);
                 document.addEventListener('touchend', handleCursorChange);
                 document.addEventListener('input', handleCursorChange); // 'input' for on-screen keyboards or auto-corrections
+
+                function updateHeightDirectly() {
+                    try {
+                      var height = document.body.scrollHeight || document.documentElement.scrollHeight;
+                      if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                          type: 'OFFSET_HEIGHT',
+                          data: height
+                        }));
+                        console.log('passive updateHeightDirectly is triggered!');
+                        return true; // Return true to avoid JavaScript execution errors
+                      } else {
+                        console.error('window.ReactNativeWebView not found');
+                        return false; // Return false if the postMessage object is not available
+                      }
+                    } catch (e) {
+                      console.error('Error in injected script', e.message);
+                      return false; // Catch and log any errors
+                    }
+                };
+
+                // document.addEventListener('DOMContentLoaded', () => {
+                //     setTimeout(() => { 
+                //         updateHeightDirectly();
+                //     }, 1234);
+                // });
+                window.addEventListener('load', () => {
+                    setTimeout(() => { 
+                        updateHeightDirectly();
+                    }, 888);
+                });
                 
               return {content, paragraphSeparator: paragraphSeparator, settings};
           };

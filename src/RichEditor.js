@@ -151,6 +151,41 @@ export default class RichTextEditor extends Component {
       this.webviewBridge?.injectJavaScript(script);
     });
   }
+
+  // updateHeightDirectly() {
+  //   return new Promise((resolve, reject) => {
+  //     const script = `
+  //       (function() {
+  //         try {
+  //           var height = document.body.scrollHeight || document.documentElement.scrollHeight;
+  //           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+  //             window.ReactNativeWebView.postMessage(JSON.stringify({
+  //               type: 'OFFSET_HEIGHT',
+  //               data: height
+  //             }));
+  //             return true; // Return true to avoid JavaScript execution errors
+  //           } else {
+  //             console.error('window.ReactNativeWebView not found');
+  //             return false; // Return false if the postMessage object is not available
+  //           }
+  //         } catch (e) {
+  //           console.error('Error in injected script', e.message);
+  //           return false; // Catch and log any errors
+  //         }
+  //       })();
+  //     `;
+  
+  //     // Inject the JavaScript into the WebView
+  //     this.webviewBridge?.injectJavaScript(script);
+  
+  //     // If the script is injected successfully, resolve the Promise
+  //     resolve('JavaScript injected successfully');
+  //   }).catch(error => {
+  //     // Handle any errors in the Promise chain
+  //     console.error('Error injecting JavaScript:', error);
+  //     reject(error); // Optionally reject the Promise
+  //   });
+  // }
     
   onMessage(event) {
     const that = this;
